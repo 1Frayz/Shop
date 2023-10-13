@@ -1,0 +1,84 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block content %}
+    <form method="GET">
+      <button type="button" class="btn btn-outline-warning left" onclick="toggleMenu()">
+          <span style="font-size: 20px; font-weight: 500;">Подбор по ингредиентам</span>
+      </button>
+      <br>
+      <div class="ingredient-dropdown" id="ingredientDropdown">
+          <div id="ingredientMenu" class="ingredient-menu">
+              <div class="row" style="margin: 0; display: flex; padding: 10px;">
+                  {% for type in types %}
+                      <div class="col-6 col-md-4 col-lg-3 mb-2" style="text-align: left">
+                          <label class="form-check-label">
+                              <input type="checkbox" class="form-check-input" name="types" value="{{ type.id }}">
+                              {{ type.name }}
+                          </label>
+                      </div>
+                  {% endfor %}
+              </div>
+              <button type="submit" class="btn btn-primary">Подобрать</button>
+          </div>
+      </div>
+  </form>
+    <div class="row row-cols-3">
+            {% if products|length < 1 %}
+            <span style="color: #4b4748; font-size: 25px; font-weight: 600;">Ничего нет(</span>
+                  
+            {%endif%}
+
+            {% for product in products %}
+            <div class="col-md-3 p-5 border" style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center;">
+              <a href="{{ product.get_absolute_url }}">
+                  <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static "img/no_image.png" %}{% endif %}" class="rounded" style="width: 250px">
+                  <a href="{{ product.get_absolute_url }}" style="text-decoration: none;">
+                      <span style="color: #4b4748; font-size: 22px; font-weight: 300;">{{ product.name }}</span>
+                  </a>
+                  <span style="color: red; font-size: 20px; font-weight: 500;">{{ product.price }}руб</span>
+                  <span style="color: gray; font-size: 15px; font-weight: 100;">{{ product.weight}}</span>
+                  <span style="text-align: left; color: #4b4748; font-size: 15px; font-weight: 400;">
+                  {% for product_type in product.types.all %}
+                      {{ product_type.name }}{% if not forloop.last %}, {% endif %}
+                      {% endfor %}
+                  </span>
+                  <br>
+                  <div style="margin-top: auto; display: flex">
+                      <button type="button" class="btn btn-outline-danger" onclick="addToCart({{ product.id }})"><span style="font-size: 18px; font-weight: 600;">Заказать</span></button>
+                  </div>
+              </a>
+          </div>
+          {% endfor %}
+    </div>    
+{% endblock %}
+
+{% block js %}
+<script>
+  const csrftoken = Cookies.get('csrftoken');
+  function addToCart(productId) {
+
+    fetch('/cart/add/'+ productId + '/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+    })
+    .then(data => {
+      window.location.href = "{% url 'cart:cart_detail' %}";
+    });
+  }
+
+  function toggleMenu() {
+    const menu = document.getElementById('ingredientMenu');
+    const dropdown = document.getElementById('ingredientDropdown');
+    const isMenuVisible = menu.style.display === 'block';
+
+    if (isMenuVisible) {
+        menu.style.display = 'none';
+        dropdown.style.marginBottom = '0';
+    } else {
+        menu.style.display = 'block';
+        dropdown.style.marginBottom = `${menu.clientHeight}px`;
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "shop/base.html" %}
+
+{% block title %}
+    Спасибо
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="py-5 text-center">
+            <h1 class="mb-3">Спасибо</h1>
+            <p>Ваш заказ успешно оформлен. Номер вашего заказа: <strong>{{ order.id }}</strong>.</p>
+        </div>
+
+        <div class="text-center">
+            <p>Вы будете перенаправлены на главную страницу через <span id="countdown">5</span> секунд(ы).</p>
+        </div>
+    </div>
+
+    <script>
+        function countdown() {
+            var seconds = 5;
+            var countdownElement = document.getElementById('countdown');
+            var countdownInterval = setInterval(function() {
+                seconds--;
+                countdownElement.innerText = seconds;
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = "{% url 'shop:category_list' %}";
+                }
+            }, 1000);
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            countdown();
+        });
+    </script>
+{% endblock %}

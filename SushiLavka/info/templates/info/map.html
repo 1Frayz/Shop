@@ -1,0 +1,44 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block content %}
+<span style="color: #4b4748; font-size: 40px; font-weight: 600;">Контакты</span>
+<div class="row">
+  <div class="col-lg-5">
+        <div class="address" style="color: #4b4748; font-size: 20px; font-weight: 400;">
+          <p><strong>Адрес:</strong> Ипподромская улица, 1С</p>
+          <p><strong>Режим работы:</strong></p>
+          <ul>
+              <li><strong>Пн - Пт:</strong> 8:00 - 23:00</li>
+              <li><strong>Сб - Вс:</strong> 9:00 - 21:00</li>
+          </ul>
+          <p><strong>Номер телефона:</strong> <a href="tel:+79137894444">8-913-789-44-44</a></p>
+      </div>
+  </div>
+  <div class="col-lg-7">
+    <div id="map" style="border: 1px solid #666;"></div>
+</div>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+{% block js %}
+<script src="https://maps.api.2gis.ru/2.0/loader.js"></script>
+  <script>
+    DG.then(function () {
+      var map = DG.map('map', {
+        center: [55.024652, 82.935521], 
+        zoom: 17
+      });
+
+      DG.marker([55.024652, 82.935521]).addTo(map).bindPopup('СушиЛавка');
+    });
+  </script>
+{% endblock %}

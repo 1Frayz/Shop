@@ -1,0 +1,101 @@
+{% extends "shop/base.html" %}
+
+{% block title %}
+  Оформление заказа
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="py-5 text-center">
+      <h1 class="mb-3">Оформление заказа</h1>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 order-md-1">
+        <h4 class="mb-3">Ваш заказ</h4>
+        <ul class="list-group mb-3">
+          {% for item in cart %}
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">{{ item.product.name }}</h6>
+                <small class="text-muted">{{ item.quantity }} x {{ item.product.price }} руб</small>
+              </div>
+              <span class="text-muted">{{ item.total_price|floatformat:2 }} руб</span>
+            </li>
+          {% endfor %}
+          {% if cart.coupon and cart.coupon.price <= cart.get_total_price%}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Промокод "{{ cart.coupon.code }}" ({{ cart.coupon.discount }}% скидка)</span>
+              <span class="neg">- {{ cart.get_discount|floatformat:2 }} руб</span>
+            </li>
+          {% endif %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>Итого</span>
+            <strong>{{ cart.get_total_price_after_discount|floatformat:2 }} руб</strong>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6 order-md-2">
+        <h4 class="mb-3">Данные для заказа</h4>
+        <form method="post" class="order-form">
+          {% csrf_token %}
+          <div class="form-group">
+            {{ form.first_name.label_tag }}
+            <input type="text" class="form-control" name="{{ form.first_name.name }}" placeholder="Ваше имя" required>
+          </div>
+          <div class="form-group">
+            {{ form.phone.label_tag }}
+            <input type="text" class="form-control" name="{{ form.phone.name }}" placeholder="Номер телефона" required>
+          </div>
+          <div class="form-group">
+            {{ form.comment.label_tag }}
+            <textarea class="form-control" rows="3" name="{{ form.comment.name }}"></textarea>
+          </div>
+          <div class="form-group">
+            {{ form.delivery.label_tag }}
+            {{ form.delivery }}
+          </div>
+          <div id="address-group" class="form-group" style="display: none;">
+            {{ form.address.label_tag }}
+            <input type="text" class="form-control" name="{{ form.address.name }}" placeholder="Адрес">
+          </div>
+          <div class="form-group">
+            <label for="{{ form.delivery_date.id_for_label }}">{{ form.delivery_date.label }}</label>
+            <input type="datetime-local" class="form-control" name="{{ form.delivery_date.name }}" id="{{ form.delivery_date.id_for_label }}" required 
+                   min="{{ now|date:'Y-m-d' }}T09:00" max="{{ now|date:'Y-m-d' }}T21:00" step="600">
+            </div>
+            <div class="form-group">
+              {{ payment_methods.payment_method.label_tag }}
+              <ul>
+                {% for radio in payment_methods.payment_method %}
+                  <li>
+                    {{ radio }}
+                  </li>
+                {% endfor %}
+              </ul>
+              </div>
+          <hr class="mb-4">
+          <button class="btn btn-primary btn-lg btn-block" type="submit">Оформить заказ</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $('#id_delivery').change(function() {
+        if ($(this).is(':checked')) {
+          $('#address-group').show();
+        } else {
+          $('#address-group').hide();
+        }
+      });
+
+      $('#{{ form.delivery_date.id_for_label }}').on('input', function() {
+        var selectedMinute = parseInt($(this).val().split(':')[1]);
+        var roundedMinute = Math.floor(selectedMinute / 10) * 10;
+        $(this).val($(this).val().split(':')[0] + ':' + roundedMinute);
+      });
+    });
+  </script>
+{% endblock %}

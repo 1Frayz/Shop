@@ -1,0 +1,112 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}
+  Ваша корзина
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="mt-5 mb-4">Ваша корзина</h1>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Фото</th>
+          <th>Продукт</th>
+          <th>Кол-во</th>
+          <th>Удалить</th>
+          <th>Цена за одну</th>
+          <th>Цена</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart %}
+          {% with product=item.product %}
+            <tr>
+              <td>
+                <a href="{{ product.get_absolute_url }}">
+                  <img src="{% if product.image %}{{ product.image.url }}
+                  {% else %}{% static "img/no_image.png" %}{% endif %}" alt="{{ product.name }}" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                </a>
+              </td>
+              <td>{{ product.name }}</td>
+              <td>
+                  {{ item.quantity }}
+              </td>
+              <td>
+                <form action="{% url "cart:cart_remove" product.id %}" method="post">
+                  <button type="submit" class="btn btn-danger">Удалить</button>
+                  {% csrf_token %}
+                </form>
+              </td>
+              <td class="num">{{ item.price }} руб</td>
+              <td class="num">{{ item.total_price }} руб</td>
+            </tr>
+          {% endwith %}
+        {% endfor %}
+        {% if cart.coupon and cart.coupon.price <= cart.get_total_price%}
+          <tr class="subtotal">
+            <td>Цена</td>
+            <td colspan="4"></td>
+            <td class="num">{{ cart.get_total_price|floatformat:2 }} руб</td>
+          </tr>
+          <tr>
+            <td>
+              "{{ cart.coupon.code }}" Промокод
+              ({{ cart.coupon.discount }}% вкл)
+            </td>
+            <td colspan="4"></td>
+            <td class="num neg">
+              - {{ cart.get_discount|floatformat:2 }} руб
+            </td>
+          </tr>
+        {% endif %}
+        <tr class="total">
+          <td>Всего</td>
+          <td colspan="4"></td>
+          <td class="num">
+            {{ cart.get_total_price_after_discount|floatformat:2 }} руб
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-4">
+      <p>Промокод:</p>
+      <form action="{% url "coupons:apply" %}" method="post">
+        {{ coupon_apply_form }}
+        <button type="submit" class="btn btn-primary">Принять</button>
+        {% csrf_token %}
+      </form>
+      <p class="text-right">
+        {% if last_products == None %}
+        <a href="/" class="btn btn-secondary">Продолжить покупку</a>
+        {% else %}
+          <a href="{{ last_products.category.get_absolute_url }}" class="btn btn-secondary">Продолжить покупку</a>
+        {% endif%}
+        <a href="{% url "orders:order_create" %}" class="btn btn-success">Оформление заказа</a>
+      </p>
+    </div>
+    {% if recommended_products %}
+        <div class="recommendations mt-5">
+            <h3 class="font-weight-bold">Также рекомендуем:</h3>
+            <div class="row">
+                {% for product in recommended_products %}
+                <div class="col-md-3 p-5 border" style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <a href="{{ product.get_absolute_url }}">
+                        <img style="height: 130px"src="{% if product.image %}{{ product.image.url }}{% else %}{% static "img/no_image.png" %}{% endif %}" class="rounded" style="width: 250px">
+                        <a href="{{ product.get_absolute_url }}" style="text-decoration: none;">
+                            <span style="color: #4b4748; font-size: 17px; font-weight: 300;">{{ product.name }}</span>
+                        </a>
+                        <span style="color: red; font-size: 18px; font-weight: 500;">{{ product.price }}руб</span>
+                        <div style="margin-top: auto; display: flex">
+                            <button type="button" class="btn btn-outline-danger" onclick="addToCart({{ product.id }})"><span style="font-size: 16px; font-weight: 600;">Заказать</span></button>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+  </div>
+{% endblock %}

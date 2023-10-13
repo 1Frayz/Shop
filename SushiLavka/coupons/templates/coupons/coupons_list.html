@@ -1,0 +1,19 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block content %}
+<img src="{% static 'img/SushiBanner.png' %}" style="width: 100%">
+    <div class="row" style="margin-top: 15px">
+        {% for coupon in coupons %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ coupon.image.url }}" class="card-img-top" alt="{{ coupon.code }}">
+                    <div class="card-body">
+                        <h5>{{ coupon.code }}</h5>
+                        <p class="card-text">{{ coupon.description }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+</div>
+{% endblock %}
